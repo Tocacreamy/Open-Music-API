@@ -22,13 +22,13 @@ export const up = (pgm) => {
     },
     duration: {
       type: 'INTEGER',
-      notNull: false, // Opsional
+      notNull: false, 
     },
-    album_id: { // Menggunakan snake_case untuk konsistensi di database
+    album_id: { 
       type: 'VARCHAR(50)',
-      notNull: false, // Opsional jika lagu bisa tanpa album
-      references: 'albums(id)', // Menandakan ini foreign key
-      onDelete: 'CASCADE',      // Jika album dihapus, lagu ikut terhapus
+      notNull: false, 
+      references: 'albums(id)',
+      onDelete: 'CASCADE',      
     },
   });
 };
