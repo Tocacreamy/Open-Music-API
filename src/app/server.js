@@ -7,6 +7,7 @@ import { AlbumsValidator } from "../validator/albums/index.js";
 import { SongsValidator } from "../validator/songs/index.js";
 import AlbumsService from "../services/postgres/AlbumsService.js";
 import SongsService from "../services/postgres/SongsService.js";
+import ClientError from "../exceptions/ClientError.js";
 
 const init = async () => {
   const songsService = new SongsService();
@@ -38,6 +39,30 @@ const init = async () => {
       },
     },
   ]);
+
+  server.ext("onPreResponse", (request, h) => {
+    const { response } = request;
+    if (response instanceof Error) {
+      if (response instanceof ClientError) {
+        const newResponse = h.response({
+          status: "fail",
+          message: response.message,
+        });
+        newResponse.code(response.statusCode);
+        return newResponse;
+      }
+
+      const newResponse = h.response({
+        status: "error",
+        message: "Maaf, terjadi kegagalan pada server kami.",
+      });
+      newResponse.code(500);
+      console.error(response);
+      return newResponse;
+    }
+
+    return h.continue;
+  });
 
   await server.start();
 

@@ -1,6 +1,7 @@
 export class SongsHandler {
-  constructor(validator) {
+  constructor(validator, service) {
     this._validator = validator;
+    this._service = service;
   }
 
   postSong = async (request, h) => {
@@ -19,7 +20,7 @@ export class SongsHandler {
     return response;
   };
 
-  getSongs = async () => {
+  getSongs = async (request, h) => {
     // service
     const songs = await this._service.getSongs();
 
