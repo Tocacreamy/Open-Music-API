@@ -66,5 +66,4 @@ export class AlbumsHandler {
 
   // OPSIONAL
 
-  // getSongsByAlbumDetail = async (request, h) => {};
 }

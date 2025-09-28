@@ -19,11 +19,6 @@ export const routes = (handler) => [
     path: "/albums/{id}",
     handler: handler.deleteAlbumById,
   },
-
   // OPSIONAL
-  // {
-  //   method: "GET",
-  //   path: "/albums/{albumId}",
-  //   handler: handler.getSongsByAlbumDetail,
-  // },
+
 ];
