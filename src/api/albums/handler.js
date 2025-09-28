@@ -1,14 +1,16 @@
 export class AlbumsHandler {
-  constructor(validator) {
+  constructor(validator, service) {
     this._validator = validator;
+    this._service = service;
   }
 
   postAlbum = async (request, h) => {
     //validator
     this._validator.validateAlbumPayload(request.payload);
-    //  service &
+    //  service
+    const { name, year } = request.payload;
+    const albumId = await this._service.addAlbum({ name, year });
 
-    const albumId = 5;
     const response = h.response({
       status: "success",
       data: {
@@ -21,7 +23,9 @@ export class AlbumsHandler {
 
   getAlbumById = async (request, h) => {
     // service
-    const album = "Tangerine";
+    const { id } = request.params;
+    const album = await this._service.getAlbumById(id);
+
     const response = h.response({
       status: "success",
       data: {
@@ -36,10 +40,12 @@ export class AlbumsHandler {
     // validator
     this._validator.validateAlbumPayload(request.payload);
     // & service
+    const { id } = request.params;
+    await this._service.editAlbumById(id, request.payload);
 
     const response = h.response({
       status: "success",
-      message: "Album successfully updated",
+      message: "Album berhasil diupdate",
     });
     response.code(200);
     return response;
@@ -47,10 +53,12 @@ export class AlbumsHandler {
 
   deleteAlbumById = async (request, h) => {
     // service
+    const { id } = request.params;
+    await this._service.deleteAlbumById(id);
 
     const response = h.response({
       status: "success",
-      message: "Album successfully deleted",
+      message: "Album berhasil dihapus",
     });
     response.code(200);
     return response;
@@ -58,5 +66,5 @@ export class AlbumsHandler {
 
   // OPSIONAL
 
-  getSongsByAlbumDetail = async (request, h) => {};
+  // getSongsByAlbumDetail = async (request, h) => {};
 }

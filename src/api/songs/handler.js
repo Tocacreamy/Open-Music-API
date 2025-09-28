@@ -7,8 +7,8 @@ export class SongsHandler {
     //  validation
     this._validator.validateSongPayload(request.payload);
     // service
+    const songId = await this._service.addSong(request.payload);
 
-    const songId = 2;
     const response = h.response({
       status: "success",
       data: {
@@ -21,7 +21,8 @@ export class SongsHandler {
 
   getSongs = async () => {
     // service
-    const songs = "Jentaka";
+    const songs = await this._service.getSongs();
+
     const response = h.response({
       status: "success",
       data: {
@@ -34,7 +35,9 @@ export class SongsHandler {
 
   getSongById = async (request, h) => {
     // service
-    const song = "Reawakening";
+    const { id } = request.params;
+    const song = await this._service.getSongById(id);
+
     const response = h.response({
       status: "success",
       data: {
@@ -49,10 +52,12 @@ export class SongsHandler {
     // validation
     this._validator.validateSongPayload(request.payload);
     // service
-    
+    const { id } = request.params;
+    await this._service.editSongById(id, request.payload);
+
     const response = h.response({
       status: "success",
-      message: "song has successfully updated",
+      message: "Lagu berhasil diupdate",
     });
     response.code(200);
     return response;
@@ -60,10 +65,12 @@ export class SongsHandler {
 
   deleteSongById = async (request, h) => {
     // service
+    const { id } = request.params;
+    await this._service.deleteSongById(id);
 
     const response = h.response({
       status: "success",
-      message: "song has successfully deleted",
+      message: "Lagu berhasil dihapus",
     });
     response.code(200);
     return response;
@@ -71,7 +78,7 @@ export class SongsHandler {
 
   // OPTIONAL
 
-  getSongByQuery = async (request, h) => {
-    return "opsional";
-  };
+  // getSongByQuery = async (request, h) => {
+  //   return "opsional";
+  // };
 }
