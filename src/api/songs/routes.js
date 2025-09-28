@@ -24,13 +24,4 @@ export const routes = (handler) => [
     path: "/songs/{id}",
     handler: handler.deleteSongById,
   },
-
-  // OPTIONAL
-
-  // {
-  //   method: "GET",
-  //   path: "/songs",
-  //   handler: handler.getSongByQuery,
-  // },
-
 ];

@@ -5,9 +5,8 @@ export class SongsHandler {
   }
 
   postSong = async (request, h) => {
-    //  validation
     this._validator.validateSongPayload(request.payload);
-    // service
+
     const songId = await this._service.addSong(request.payload);
 
     const response = h.response({
@@ -21,7 +20,6 @@ export class SongsHandler {
   };
 
   getSongs = async (request, h) => {
-    // service
     const { title, performer } = request.query;
     const songs = await this._service.getSongs({ title, performer });
 
@@ -36,7 +34,6 @@ export class SongsHandler {
   };
 
   getSongById = async (request, h) => {
-    // service
     const { id } = request.params;
     const song = await this._service.getSongById(id);
 
@@ -51,9 +48,8 @@ export class SongsHandler {
   };
 
   putSongById = async (request, h) => {
-    // validation
     this._validator.validateSongPayload(request.payload);
-    // service
+
     const { id } = request.params;
     await this._service.editSongById(id, request.payload);
 
@@ -66,7 +62,6 @@ export class SongsHandler {
   };
 
   deleteSongById = async (request, h) => {
-    // service
     const { id } = request.params;
     await this._service.deleteSongById(id);
 
@@ -77,10 +72,4 @@ export class SongsHandler {
     response.code(200);
     return response;
   };
-
-  // OPTIONAL
-
-  // getSongByQuery = async (request, h) => {
-  //   return "opsional";
-  // };
 }

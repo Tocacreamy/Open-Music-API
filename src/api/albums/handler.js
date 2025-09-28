@@ -5,9 +5,8 @@ export class AlbumsHandler {
   }
 
   postAlbum = async (request, h) => {
-    //validator
     this._validator.validateAlbumPayload(request.payload);
-    //  service
+
     const { name, year } = request.payload;
     const albumId = await this._service.addAlbum({ name, year });
 
@@ -22,7 +21,6 @@ export class AlbumsHandler {
   };
 
   getAlbumById = async (request, h) => {
-    // service
     const { id } = request.params;
     const album = await this._service.getAlbumById(id);
 
@@ -37,9 +35,8 @@ export class AlbumsHandler {
   };
 
   putAlbumById = async (request, h) => {
-    // validator
     this._validator.validateAlbumPayload(request.payload);
-    // & service
+
     const { id } = request.params;
     await this._service.editAlbumById(id, request.payload);
 
@@ -52,7 +49,6 @@ export class AlbumsHandler {
   };
 
   deleteAlbumById = async (request, h) => {
-    // service
     const { id } = request.params;
     await this._service.deleteAlbumById(id);
 
@@ -63,7 +59,4 @@ export class AlbumsHandler {
     response.code(200);
     return response;
   };
-
-  // OPSIONAL
-
 }
