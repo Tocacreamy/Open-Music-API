@@ -1,17 +1,29 @@
 "use strict";
 import Hapi from "@hapi/hapi";
 import "dotenv/config";
+
+// songs
 import { songs } from "../api/songs/index.js";
+import { SongsValidator } from "../validator/songs/index.js";
+import SongsService from "../services/postgres/SongsService.js";
+
+// albums
 import { albums } from "../api/albums/index.js";
 import { AlbumsValidator } from "../validator/albums/index.js";
-import { SongsValidator } from "../validator/songs/index.js";
 import AlbumsService from "../services/postgres/AlbumsService.js";
-import SongsService from "../services/postgres/SongsService.js";
+
+// users
+import { users } from "../api/users/index.js";
+import { UsersService } from "../services/postgres/UsersService.js";
+import { UsersValidator } from "../validator/users/index.js";
+
+// exceptions
 import ClientError from "../exceptions/ClientError.js";
 
 const init = async () => {
   const songsService = new SongsService();
   const albumService = new AlbumsService();
+  const usersService = new UsersService();
 
   const server = Hapi.server({
     host: process.env.HOST,
@@ -36,6 +48,13 @@ const init = async () => {
       options: {
         validator: SongsValidator,
         service: songsService,
+      },
+    },
+    {
+      plugin: users,
+      options: {
+        service: usersService,
+        validator: UsersValidator,
       },
     },
   ]);
