@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import InvariantError from "../../exceptions/InvariantError.js";
-import {AuthenticationError} from "../../exceptions/AuthenticationError.js";
+import AuthenticationError from "../../exceptions/AuthenticationError.js";
 import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
 
