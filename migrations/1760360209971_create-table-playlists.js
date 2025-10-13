@@ -1,25 +1,22 @@
 export const up = (pgm) => {
-  pgm.createTable("users", {
+  pgm.createTable("playlists", {
     id: {
       type: "VARCHAR(50)",
       primaryKey: true,
     },
-    username: {
+    name: {
+      type: "TEXT",
+      notNull: true,
+    },
+    owner: {
       type: "VARCHAR(50)",
-      unique: true,
       notNull: true,
-    },
-    password: {
-      type: "TEXT",
-      notNull: true,
-    },
-    fullname: {
-      type: "TEXT",
-      notNull: true,
+      references: "users(id)",
+      onDelete: "CASCADE",
     },
   });
 };
 
 export const down = (pgm) => {
-  pgm.dropTable("users");
+  pgm.dropTable("playlists");
 };
