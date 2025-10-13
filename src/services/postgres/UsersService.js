@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import InvariantError from "../../exceptions/InvariantError.js";
+import {AuthenticationError} from "../../exceptions/AuthenticationError.js";
 import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
 
@@ -39,5 +40,28 @@ export class UsersService {
       throw new InvariantError("User gagal ditambahkan");
     }
     return result.rows[0].id;
+  }
+
+    async verifyUserCredential(username, password) {
+    const query = {
+      text: "SELECT id, password FROM users WHERE username = $1",
+      values: [username],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new AuthenticationError("Kredensial yang Anda berikan salah");
+    }
+
+    const { id, password: hashedPassword } = result.rows[0];
+
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationError("Kredensial yang Anda berikan salah");
+    }
+
+    return id;
   }
 }
