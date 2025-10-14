@@ -1,11 +1,11 @@
 import { Pool } from "pg";
 import { nanoid } from "nanoid";
+import AuthorizationError from "../../exceptions/AuthorizationError.js";
 import InvariantError from "../../exceptions/InvariantError.js";
-
+import NotFoundError from "../../exceptions/NotFoundError.js";
 export class PlaylistsService {
-  constructor(songsService) {
+  constructor() {
     this._pool = new Pool();
-    this._songsService = songsService;
   }
 
   async addPlaylist({ name, owner }) {
@@ -31,6 +31,9 @@ export class PlaylistsService {
       values: [owner],
     };
     const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Playlist tidak ditemukan");
+    }
     return result.rows;
   }
 
@@ -41,19 +44,29 @@ export class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Playlist tidak ditemukan");
+    }
     return result.rows[0];
   }
 
   async deletePlaylist(id) {
     const query = {
-      text: "DELETE FROM playlists WHERE id = $1",
+      text: "DELETE FROM playlists WHERE id = $1 RETURNING id",
       values: [id],
     };
 
-    await this._pool.query(query);
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new InvariantError("Playlist gagal dihapus sss");
+    }
+
+    return result.rows[0].id;
   }
 
   async verifyPlaylistOwner(id, owner) {
+    await this.getPlaylistById(id);
     const query = {
       text: "SELECT * FROM playlists WHERE id = $1 AND owner = $2",
       values: [id, owner],
@@ -61,9 +74,7 @@ export class PlaylistsService {
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new InvariantError(
-        "Playlist tidak ditemukan atau Anda bukan pemiliknya"
-      );
+      throw new AuthorizationError("Anda Tidak memiliki akses ke playlist ini");
     }
   }
 }

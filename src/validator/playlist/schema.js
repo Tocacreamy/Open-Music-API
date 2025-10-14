@@ -7,3 +7,7 @@ export const PostPlaylistPayloadSchema = Joi.object({
 export const PostSongToPlaylistPayloadSchema = Joi.object({
   songId: Joi.string().required(),
 });
+
+export const DeleteSongFromPlaylistPayloadSchema = Joi.object({
+  songId: Joi.string().required(),
+});
