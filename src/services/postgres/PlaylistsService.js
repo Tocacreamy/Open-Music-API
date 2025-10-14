@@ -45,7 +45,7 @@ export class PlaylistsService {
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError("Playlist tidak ditemukan");
+      throw new NotFoundError("Playlist tidak ditemukan zzz");
     }
     return result.rows[0];
   }
@@ -59,7 +59,7 @@ export class PlaylistsService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new InvariantError("Playlist gagal dihapus sss");
+      throw new InvariantError("Playlist gagal dihapus");
     }
 
     return result.rows[0].id;

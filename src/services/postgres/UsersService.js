@@ -3,6 +3,7 @@ import InvariantError from "../../exceptions/InvariantError.js";
 import AuthenticationError from "../../exceptions/AuthenticationError.js";
 import { nanoid } from "nanoid";
 import bcrypt from "bcrypt";
+import NotFoundError from "../../exceptions/NotFoundError.js";
 
 export class UsersService {
   constructor() {
@@ -42,7 +43,21 @@ export class UsersService {
     return result.rows[0].id;
   }
 
-    async verifyUserCredential(username, password) {
+  async getUserById(id) {
+    const query = {
+      text: "SELECT id, username, fullname FROM users WHERE id = $1",
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError("User tidak ditemukan");
+    }
+    return result.rows[0];
+  }
+
+  async verifyUserCredential(username, password) {
     const query = {
       text: "SELECT id, password FROM users WHERE username = $1",
       values: [username],

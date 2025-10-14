@@ -26,9 +26,14 @@ import { TokenManager } from "../tokenize/TokenManager.js";
 
 // playlists
 import { playlists } from "../api/playlists/index.js";
-import { PlaylistsValidator } from "../validator/playlist/index.js";
+import { PlaylistsValidator } from "../validator/playlists/index.js";
 import { PlaylistsService } from "../services/postgres/PlaylistsService.js";
 import { PlaylistSongsService } from "../services/postgres/PlaylistSongsService.js";
+
+// collaborations
+import { collaborations } from "../api/collaborations/index.js";
+import { CollaborationsValidator } from "../validator/collaborations/index.js";
+import { CollaborationsService } from "../services/postgres/CollaborationsService.js";
 
 // exceptions
 import ClientError from "../exceptions/ClientError.js";
@@ -40,6 +45,7 @@ const init = async () => {
   const authenticationsService = new AuthenticationsService();
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService();
+  const collaborationsService = new CollaborationsService();
 
   const server = Hapi.server({
     host: process.env.HOST,
@@ -111,6 +117,15 @@ const init = async () => {
         validator: AuthenticationsValidator,
       },
     },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        usersService,
+        playlistsService,
+        validator: CollaborationsValidator,
+      },
+    }
   ]);
 
   server.ext("onPreResponse", (request, h) => {
