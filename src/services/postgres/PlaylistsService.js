@@ -4,8 +4,9 @@ import AuthorizationError from "../../exceptions/AuthorizationError.js";
 import InvariantError from "../../exceptions/InvariantError.js";
 import NotFoundError from "../../exceptions/NotFoundError.js";
 export class PlaylistsService {
-  constructor() {
+  constructor(collaborationService) {
     this._pool = new Pool();
+    this._collaborationService = collaborationService;
   }
 
   async addPlaylist({ name, owner }) {
@@ -22,13 +23,15 @@ export class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getPlaylists(owner) {
+  async getPlaylists(userId) {
     const query = {
-      text: `SELECT playlists.id, playlists.name, users.username 
-           FROM playlists
-           LEFT JOIN users ON playlists.owner = users.id
-           WHERE playlists.owner = $1`,
-      values: [owner],
+      text: `SELECT p.id, p.name, u.username
+            FROM playlists AS p
+            JOIN users AS u ON p.owner = u.id
+            LEFT JOIN collaborations AS c ON p.id = c.playlist_id
+            WHERE p.owner = $1 OR c.user_id = $1
+            GROUP BY p.id, u.username`,
+      values: [userId],
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
@@ -75,6 +78,21 @@ export class PlaylistsService {
     const result = await this._pool.query(query);
     if (!result.rows.length) {
       throw new AuthorizationError("Anda Tidak memiliki akses ke playlist ini");
+    }
+  }
+
+  async verifyPlaylistAccess(playlistId, userId) {
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaborationService.verifyCollaborator(playlistId, userId);
+      } catch {
+        throw error;
+      }
     }
   }
 }
