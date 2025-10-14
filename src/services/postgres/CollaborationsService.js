@@ -17,7 +17,7 @@ export class CollaborationsService {
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new InvariantError("Collaboration failed");
+      throw new InvariantError("Kolaborasi gagal ditambahkan");
     }
     return result.rows[0].id;
   }
@@ -30,7 +30,7 @@ export class CollaborationsService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new InvariantError("Collaboration deletion failed");
+      throw new InvariantError("Kolaborasi gagal dihapus");
     }
     return result.rows[0].id;
   }
@@ -42,7 +42,7 @@ export class CollaborationsService {
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new InvariantError("User is not a collaborator");
+      throw new InvariantError("Anda bukan kolaborator pada playlist ini");
     }
   }
 }

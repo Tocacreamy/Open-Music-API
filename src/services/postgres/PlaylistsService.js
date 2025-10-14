@@ -48,7 +48,7 @@ export class PlaylistsService {
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError("Playlist tidak ditemukan zzz");
+      throw new NotFoundError("Playlist tidak ditemukan ");
     }
     return result.rows[0];
   }
@@ -77,22 +77,37 @@ export class PlaylistsService {
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new AuthorizationError("Anda Tidak memiliki akses ke playlist ini");
+      throw new NotFoundError("Playlist tidak ditemukan");
+    }
+
+    if (result.rows[0].owner !== owner) {
+      throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
     }
   }
 
   async verifyPlaylistAccess(playlistId, userId) {
-    try {
-      await this.verifyPlaylistOwner(playlistId, userId);
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-      try {
-        await this._collaborationService.verifyCollaborator(playlistId, userId);
-      } catch {
-        throw error;
-      }
+    const query = {
+      text: `
+            SELECT p.owner, c.user_id AS collaborator_id
+            FROM playlists AS p
+            LEFT JOIN collaborations AS c ON p.id = c.playlist_id AND c.user_id = $2
+            WHERE p.id = $1
+        `,
+      values: [playlistId, userId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Playlist tidak ditemukan");
     }
+
+    const playlist = result.rows[0];
+    const isOwner = playlist.owner === userId;
+    const isCollaborator = playlist.collaborator_id === userId;
+
+    if (!isOwner && !isCollaborator) {
+      throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
+    }
+
   }
 }
