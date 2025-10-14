@@ -25,30 +25,29 @@ export class PlaylistsService {
 
   async getPlaylists(userId) {
     const query = {
-      text: `SELECT p.id, p.name, u.username
-            FROM playlists AS p
-            JOIN users AS u ON p.owner = u.id
-            LEFT JOIN collaborations AS c ON p.id = c.playlist_id
-            WHERE p.owner = $1 OR c.user_id = $1
-            GROUP BY p.id, u.username`,
+      text: `
+      SELECT DISTINCT p.id, p.name, u.username
+      FROM playlists AS p
+      JOIN users AS u ON p.owner = u.id
+      LEFT JOIN collaborations AS c ON p.id = c.playlist_id
+      WHERE p.owner = $1 OR c.user_id = $1
+      `,
       values: [userId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
-      throw new NotFoundError("Playlist tidak ditemukan");
-    }
     return result.rows;
   }
 
   async getPlaylistById(id) {
+    console.log("ini id : ", id);
     const query = {
-      text: "SELECT * FROM playlists WHERE id = $1",
+      text: "SELECT * FROM playlists WHERE id = $1 ",
       values: [id],
     };
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError("Playlist tidak ditemukan ");
+      throw new NotFoundError("Playlist tidak ditemukan");
     }
     return result.rows[0];
   }
@@ -69,7 +68,7 @@ export class PlaylistsService {
   }
 
   async verifyPlaylistOwner(id, owner) {
-    await this.getPlaylistById(id);
+    // await this.getPlaylistById(id);
     const query = {
       text: "SELECT * FROM playlists WHERE id = $1 AND owner = $2",
       values: [id, owner],
@@ -77,12 +76,12 @@ export class PlaylistsService {
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError("Playlist tidak ditemukan");
-    }
-
-    if (result.rows[0].owner !== owner) {
       throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
     }
+
+    // if (result.rows[0].owner !== owner) {
+    //   throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
+    // }
   }
 
   async verifyPlaylistAccess(playlistId, userId) {
@@ -108,6 +107,5 @@ export class PlaylistsService {
     if (!isOwner && !isCollaborator) {
       throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
     }
-
   }
 }

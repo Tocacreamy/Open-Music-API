@@ -16,6 +16,7 @@ export class CollaborationsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { playlistId, userId } = request.payload;
 
+    await this._playlistsService.getPlaylistById(playlistId);
     await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
     await this._usersService.getUserById(userId);
     const collaborationId = await this._collaborationsService.addCollaboration(userId, playlistId);
@@ -35,8 +36,8 @@ export class CollaborationsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { playlistId, userId } = request.payload;
 
-    await this._usersService.getUserById(userId);
     await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
+    await this._usersService.getUserById(userId);
     await this._collaborationsService.deleteCollaboration(userId, playlistId);
 
     const response = h.response({

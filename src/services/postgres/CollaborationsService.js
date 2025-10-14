@@ -9,8 +9,6 @@ export class CollaborationsService {
 
   async addCollaboration(userId, playlistId) {
     const id = `collaboration-${nanoid(16)}`;
-
-    console.log(`cek dlu,user: ${userId},playlist: ${playlistId}`);
     const query = {
       text: "INSERT INTO collaborations (id, user_id, playlist_id) VALUES ($1, $2, $3) RETURNING id",
       values: [id, userId, playlistId],

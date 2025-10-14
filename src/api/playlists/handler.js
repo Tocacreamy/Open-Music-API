@@ -45,6 +45,7 @@ export class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
 
+    console.log('ini bukan')
     await this._service.verifyPlaylistOwner(playlistId, credentialId);
     await this._service.deletePlaylist(playlistId);
 
@@ -82,7 +83,7 @@ export class PlaylistsHandler {
   getPlaylistSongsHandler = async (request, h) => {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
-    
+
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
     const playlist = await this._playlistSongsService.getSongsFromPlaylist(
       playlistId,
