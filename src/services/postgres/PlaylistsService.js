@@ -39,7 +39,7 @@ export class PlaylistsService {
   }
 
   async getPlaylistById(id) {
-    console.log("ini id : ", id);
+
     const query = {
       text: "SELECT * FROM playlists WHERE id = $1 ",
       values: [id],

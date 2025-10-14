@@ -45,7 +45,6 @@ export class PlaylistsHandler {
     const { id: credentialId } = request.auth.credentials;
     const { id: playlistId } = request.params;
 
-    console.log('ini bukan')
     await this._service.verifyPlaylistOwner(playlistId, credentialId);
     await this._service.deletePlaylist(playlistId);
 
