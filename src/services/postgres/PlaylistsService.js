@@ -116,10 +116,11 @@ export class PlaylistsService {
 
   async getPlaylistActivities(playlistId) {
     const query = {
-      text: "SELECT * FROM playlist_song_activities WHERE playlist_id = $1",
+      text: "SELECT u.username, s.title, psa.action ,psa.time FROM playlist_song_activities psa LEFT JOIN users u ON psa.user_id = u.id LEFT JOIN songs s ON psa.song_id = s.id WHERE psa.playlist_id = $1 ORDER BY psa.time ASC",
       values: [playlistId],
     };
     const result = await this._pool.query(query);
+
     return result.rows;
   }
 }
