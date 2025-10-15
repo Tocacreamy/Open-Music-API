@@ -47,4 +47,12 @@ export const routes = (handler) => [
       auth: "openmusic_jwt",
     },
   },
+  {
+    method: "GET",
+    path: "/playlists/{id}/activities",
+    handler: handler.getPlaylistActivitiesHandler,
+    options: {
+      auth: "openmusic_jwt",
+    },
+  },
 ];

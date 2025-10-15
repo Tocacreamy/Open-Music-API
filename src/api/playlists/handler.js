@@ -120,4 +120,19 @@ export class PlaylistsHandler {
     return response;
   };
 
+  getPlaylistActivitiesHandler = async (request, h) => {
+    const { id: credentialId } = request.auth.credentials;
+    const { id: playlistId } = request.params;
+
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
+    const activities = await this._playlistSongsService.getPlaylistActivities(playlistId);
+    const response = h.response({
+      status: "success",
+      data: {
+        activities,
+      },
+    });
+    response.code(200);
+    return response;
+  };
 }

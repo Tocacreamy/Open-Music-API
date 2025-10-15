@@ -39,7 +39,6 @@ export class PlaylistsService {
   }
 
   async getPlaylistById(id) {
-
     const query = {
       text: "SELECT * FROM playlists WHERE id = $1 ",
       values: [id],
@@ -68,7 +67,6 @@ export class PlaylistsService {
   }
 
   async verifyPlaylistOwner(id, owner) {
-    // await this.getPlaylistById(id);
     const query = {
       text: "SELECT * FROM playlists WHERE id = $1 AND owner = $2",
       values: [id, owner],
@@ -78,10 +76,6 @@ export class PlaylistsService {
     if (!result.rows.length) {
       throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
     }
-
-    // if (result.rows[0].owner !== owner) {
-    //   throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
-    // }
   }
 
   async verifyPlaylistAccess(playlistId, userId) {
@@ -107,5 +101,25 @@ export class PlaylistsService {
     if (!isOwner && !isCollaborator) {
       throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
     }
+  }
+
+  async addPlaylistSongActivity(playlistId, songId, userId, action) {
+    const id = `activity-${nanoid(16)}`;
+    const query = {
+      text: `INSERT INTO playlist_song_activities 
+            (id, playlist_id, song_id, user_id, action) 
+            VALUES ($1, $2, $3, $4, $5)`,
+      values: [id, playlistId, songId, userId, action],
+    };
+    await this._pool.query(query);
+  }
+
+  async getPlaylistActivities(playlistId) {
+    const query = {
+      text: "SELECT * FROM playlist_song_activities WHERE playlist_id = $1",
+      values: [playlistId],
+    };
+    const result = await this._pool.query(query);
+    return result.rows;
   }
 }
