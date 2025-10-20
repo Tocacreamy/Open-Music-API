@@ -35,6 +35,11 @@ import { collaborations } from "../api/collaborations/index.js";
 import { CollaborationsValidator } from "../validator/collaborations/index.js";
 import { CollaborationsService } from "../services/postgres/CollaborationsService.js";
 
+// exports
+import { _exports } from "../api/exports/index.js";
+import { ExportsValidator } from "../validator/exports/index.js";
+import { ProducerService } from "../services/rabbitmq/ProducerService.js";
+
 // exceptions
 import ClientError from "../exceptions/ClientError.js";
 
@@ -125,7 +130,15 @@ const init = async () => {
         playlistsService,
         validator: CollaborationsValidator,
       },
-    }
+    },
+    {
+      plugin: _exports,
+      options: {
+        validator: ExportsValidator,
+        service: ProducerService,
+        playlistsService: playlistsService,
+      },
+    },
   ]);
 
   server.ext("onPreResponse", (request, h) => {
