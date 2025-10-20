@@ -1,6 +1,7 @@
-const ExportNotesPayloadSchema = require("./schema");
-const InvariantError = require("../../exceptions/InvariantError");
-const ExportsValidator = {
+import { ExportNotesPayloadSchema } from './schema.js';
+import InvariantError from '../../exceptions/InvariantError.js';
+
+export const ExportsValidator = {
   validateExportNotesPayload: (payload) => {
     const validationResult = ExportNotesPayloadSchema.validate(payload);
     if (validationResult.error) {
