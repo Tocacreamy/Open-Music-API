@@ -14,9 +14,11 @@ export class ExportsHandler {
     await this._playlistService.verifyPlaylistAccess(playlistId, credentialId);
 
     const message = {
+      credentialId,
       playlistId,
       targetEmail,
     };
+
     await this._service.sendMessage(
       "export:playlists",
       JSON.stringify(message)
@@ -25,6 +27,9 @@ export class ExportsHandler {
     const response = h.response({
       status: "success",
       message: "Permintaan Anda dalam antrean",
+      credentialId,
+      playlistId,
+      targetEmail,
     });
     response.code(201);
     return response;
