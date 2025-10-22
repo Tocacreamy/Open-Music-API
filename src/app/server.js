@@ -5,6 +5,7 @@ import Jwt from "@hapi/jwt";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import inert from "@hapi/inert";
 
 // songs
 import { songs } from "../api/songs/index.js";
@@ -44,7 +45,6 @@ import { ExportsValidator } from "../validator/exports/index.js";
 import { ProducerService } from "../services/rabbitmq/ProducerService.js";
 
 // uploads
-import { uploads } from "../api/uploads/index.js";
 import { UploadsValidator } from "../validator/uploads/index.js";
 import { StorageService } from "../services/storage/StorageService.js";
 
@@ -62,8 +62,8 @@ const init = async () => {
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService();
   const collaborationsService = new CollaborationsService();
-  
-  const uploadDir = path.resolve(__dirname, "../api/uploads/file/images");
+
+  const uploadDir = path.resolve(__dirname, "../api/albums/covers/images");
   fs.mkdirSync(uploadDir, { recursive: true });
   const storageService = new StorageService(uploadDir);
 
@@ -80,6 +80,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: inert,
     },
   ]);
 
@@ -103,6 +106,8 @@ const init = async () => {
       options: {
         validator: AlbumsValidator,
         service: albumService,
+        storageService,
+        UploadsValidator,
       },
     },
     {
@@ -152,13 +157,6 @@ const init = async () => {
         validator: ExportsValidator,
         service: ProducerService,
         playlistsService: playlistsService,
-      },
-    },
-    {
-      plugin: uploads,
-      options: {
-        service: storageService,
-        validator: UploadsValidator,
       },
     },
   ]);
