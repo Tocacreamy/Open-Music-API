@@ -2,6 +2,9 @@
 import Hapi from "@hapi/hapi";
 import "dotenv/config";
 import Jwt from "@hapi/jwt";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 
 // songs
 import { songs } from "../api/songs/index.js";
@@ -40,10 +43,18 @@ import { _exports } from "../api/exports/index.js";
 import { ExportsValidator } from "../validator/exports/index.js";
 import { ProducerService } from "../services/rabbitmq/ProducerService.js";
 
+// uploads
+import { uploads } from "../api/uploads/index.js";
+import { UploadsValidator } from "../validator/uploads/index.js";
+import { StorageService } from "../services/storage/StorageService.js";
+
 // exceptions
 import ClientError from "../exceptions/ClientError.js";
 
 const init = async () => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   const songsService = new SongsService();
   const albumService = new AlbumsService();
   const usersService = new UsersService();
@@ -51,6 +62,10 @@ const init = async () => {
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService();
   const collaborationsService = new CollaborationsService();
+  
+  const uploadDir = path.resolve(__dirname, "../api/uploads/file/images");
+  fs.mkdirSync(uploadDir, { recursive: true });
+  const storageService = new StorageService(uploadDir);
 
   const server = Hapi.server({
     host: process.env.HOST,
@@ -137,6 +152,13 @@ const init = async () => {
         validator: ExportsValidator,
         service: ProducerService,
         playlistsService: playlistsService,
+      },
+    },
+    {
+      plugin: uploads,
+      options: {
+        service: storageService,
+        validator: UploadsValidator,
       },
     },
   ]);
