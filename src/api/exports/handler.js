@@ -20,16 +20,13 @@ export class ExportsHandler {
     };
 
     await this._service.sendMessage(
-      "export:playlists",
+      "export:playlist:songs",
       JSON.stringify(message)
     );
 
     const response = h.response({
       status: "success",
       message: "Permintaan Anda dalam antrean",
-      credentialId,
-      playlistId,
-      targetEmail,
     });
     response.code(201);
     return response;
