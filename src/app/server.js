@@ -163,6 +163,13 @@ const init = async () => {
 
   server.ext("onPreResponse", (request, h) => {
     const { response } = request;
+
+    if (response && response.isBoom && response.output?.statusCode === 415) {
+      return h
+        .response({ status: "fail", message: "unsuported media file" })
+        .code(400);
+    }
+
     if (response instanceof Error) {
       if (response instanceof ClientError) {
         const newResponse = h.response({
