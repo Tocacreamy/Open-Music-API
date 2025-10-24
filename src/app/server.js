@@ -175,16 +175,36 @@ const init = async () => {
         albumsService: albumService,
         usersService,
       },
-    }
+    },
   ]);
+
+  server.route({
+    method: "GET",
+    path: "/albums/covers/{param*}",
+    handler: {
+      directory: {
+        path: uploadDir,
+      },
+    },
+  });
 
   server.ext("onPreResponse", (request, h) => {
     const { response } = request;
 
-    if ( response.output?.statusCode === 415) {
+    if (response.output?.statusCode === 415) {
       return h
         .response({ status: "fail", message: "unsuported media file" })
         .code(400);
+    }
+
+    if (response && response.isBoom && response.output?.statusCode === 413) {
+      return h
+        .response({
+          status: "fail",
+          message:
+            "Payload content length greater than maximum allowed: 512000",
+        })
+        .code(413);
     }
 
     if (response instanceof Error) {
