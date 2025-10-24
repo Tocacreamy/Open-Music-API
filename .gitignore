@@ -186,4 +186,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Uploaded album covers
+src/api/albums/covers/images/*
+
 # End of https://www.toptal.com/developers/gitignore/api/node,windows,visualstudiocode
