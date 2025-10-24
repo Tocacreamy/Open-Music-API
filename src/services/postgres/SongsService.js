@@ -61,7 +61,7 @@ class SongsService {
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError("Lagu tidak ditemukan zzz", id);
+      throw new NotFoundError("Lagu tidak ditemukan ", id);
     }
 
     return result.rows[0];

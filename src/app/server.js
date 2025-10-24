@@ -2,6 +2,10 @@
 import Hapi from "@hapi/hapi";
 import "dotenv/config";
 import Jwt from "@hapi/jwt";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+import inert from "@hapi/inert";
 
 // songs
 import { songs } from "../api/songs/index.js";
@@ -26,20 +30,51 @@ import { TokenManager } from "../tokenize/TokenManager.js";
 
 // playlists
 import { playlists } from "../api/playlists/index.js";
-import { PlaylistsValidator } from "../validator/playlist/index.js";
+import { PlaylistsValidator } from "../validator/playlists/index.js";
 import { PlaylistsService } from "../services/postgres/PlaylistsService.js";
 import { PlaylistSongsService } from "../services/postgres/PlaylistSongsService.js";
+
+// collaborations
+import { collaborations } from "../api/collaborations/index.js";
+import { CollaborationsValidator } from "../validator/collaborations/index.js";
+import { CollaborationsService } from "../services/postgres/CollaborationsService.js";
+
+// exports
+import { _exports } from "../api/exports/index.js";
+import { ExportsValidator } from "../validator/exports/index.js";
+import { ProducerService } from "../services/rabbitmq/ProducerService.js";
+
+// uploads
+import { UploadsValidator } from "../validator/uploads/index.js";
+import { StorageService } from "../services/storage/StorageService.js";
+
+// likes
+import { likes } from "../api/likes/index.js";
+import { LikesService } from "../services/postgres/LikesService.js";
+
+// Redis
+import { CacheService } from "../services/redis/CacheService.js";
 
 // exceptions
 import ClientError from "../exceptions/ClientError.js";
 
 const init = async () => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  const cacheService = new CacheService();
   const songsService = new SongsService();
   const albumService = new AlbumsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService();
+  const collaborationsService = new CollaborationsService();
+  const likesService = new LikesService(cacheService);
+
+  const uploadDir = path.resolve(__dirname, "../api/albums/covers/images");
+  fs.mkdirSync(uploadDir, { recursive: true });
+  const storageService = new StorageService(uploadDir);
 
   const server = Hapi.server({
     host: process.env.HOST,
@@ -54,6 +89,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: inert,
     },
   ]);
 
@@ -77,6 +115,8 @@ const init = async () => {
       options: {
         validator: AlbumsValidator,
         service: albumService,
+        storageService,
+        UploadsValidator,
       },
     },
     {
@@ -111,10 +151,42 @@ const init = async () => {
         validator: AuthenticationsValidator,
       },
     },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        usersService,
+        playlistsService,
+        validator: CollaborationsValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        validator: ExportsValidator,
+        service: ProducerService,
+        playlistsService: playlistsService,
+      },
+    },
+    {
+      plugin: likes,
+      options: {
+        likesService,
+        albumsService: albumService,
+        usersService,
+      },
+    }
   ]);
 
   server.ext("onPreResponse", (request, h) => {
     const { response } = request;
+
+    if ( response.output?.statusCode === 415) {
+      return h
+        .response({ status: "fail", message: "unsuported media file" })
+        .code(400);
+    }
+
     if (response instanceof Error) {
       if (response instanceof ClientError) {
         const newResponse = h.response({

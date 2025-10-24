@@ -24,24 +24,33 @@ export class PlaylistSongsService {
   async getSongsFromPlaylist(playlistId, credentialId) {
     const query = {
       text: `
-      SELECT 
-        p.id AS playlist_id, 
-        p.name, 
+      SELECT
+        p.id AS playlist_id,
+        p.name,
         u.username,
-        s.id AS song_id, 
-        s.title, 
+        s.id AS song_id,
+        s.title,
         s.performer
       FROM playlists p
       JOIN users u ON p.owner = u.id
       LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id
       LEFT JOIN songs s ON ps.song_id = s.id
-      WHERE p.id = $1 AND p.owner = $2
+      WHERE
+        p.id = $1
+        AND (
+          p.owner = $2
+          OR EXISTS (
+            SELECT 1
+            FROM collaborations c
+            WHERE c.playlist_id = p.id AND c.user_id = $2
+          )
+        )
     `,
       values: [playlistId, credentialId],
     };
 
     const result = await this._pool.query(query);
-    if (!result.rowCount) {
+    if (!result.rows.length) {
       throw new InvariantError("Lagu gagal diambil dari playlist");
     }
 
