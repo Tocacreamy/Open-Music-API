@@ -4,7 +4,7 @@ export class LikesHandler {
     this._albumsService = albumsService;
     this._usersService = usersService;
   }
-  
+
   postLikeAlbumHandler = async (request, h) => {
     const { id: albumId } = request.params;
     const { id: userId } = request.auth.credentials;
@@ -26,7 +26,7 @@ export class LikesHandler {
     const { id: albumId } = request.params;
 
     await this._albumsService.getAlbumById(albumId);
-    const likes = await this._likesService.getLikesCount(albumId);
+    const { likes, source } = await this._likesService.getLikesCount(albumId);
 
     const response = h.response({
       status: "success",
@@ -34,6 +34,9 @@ export class LikesHandler {
         likes,
       },
     });
+    if (source === "cache") {
+      response.header("X-Data-Source", "cache");
+    }
     response.code(200);
     return response;
   };

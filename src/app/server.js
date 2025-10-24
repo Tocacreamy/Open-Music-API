@@ -52,6 +52,9 @@ import { StorageService } from "../services/storage/StorageService.js";
 import { likes } from "../api/likes/index.js";
 import { LikesService } from "../services/postgres/LikesService.js";
 
+// Redis
+import { CacheService } from "../services/redis/CacheService.js";
+
 // exceptions
 import ClientError from "../exceptions/ClientError.js";
 
@@ -59,6 +62,7 @@ const init = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
+  const cacheService = new CacheService();
   const songsService = new SongsService();
   const albumService = new AlbumsService();
   const usersService = new UsersService();
@@ -66,7 +70,7 @@ const init = async () => {
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService();
   const collaborationsService = new CollaborationsService();
-  const likesService = new LikesService();
+  const likesService = new LikesService(cacheService);
 
   const uploadDir = path.resolve(__dirname, "../api/albums/covers/images");
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -177,7 +181,7 @@ const init = async () => {
   server.ext("onPreResponse", (request, h) => {
     const { response } = request;
 
-    if (response && response.isBoom && response.output?.statusCode === 415) {
+    if ( response.output?.statusCode === 415) {
       return h
         .response({ status: "fail", message: "unsuported media file" })
         .code(400);

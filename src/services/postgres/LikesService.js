@@ -22,6 +22,7 @@ export class LikesService {
         throw new InvariantError("Gagal menambahkan like");
       }
 
+      await this._cacheService.delete(`album-likes:${albumId}`);
       return result.rows[0].id;
     } catch (err) {
       if (err && err.code === "23505") {
@@ -40,15 +41,39 @@ export class LikesService {
     if (!result.rows.length) {
       throw new InvariantError("Failed to delete like");
     }
+    await this._cacheService.delete(`album-likes:${albumId}`);
   }
 
   async getLikesCount(albumId) {
-    const query = {
-      text: "SELECT COUNT(*)::int AS likes FROM user_album_likes WHERE album_id = $1",
-      values: [albumId],
-    };
-    const result = await this._pool.query(query);
-    return result.rows[0].likes;
+    try {
+      const likesFromCache = await this._cacheService.get(
+        `album-likes:${albumId}`
+      );
+      return {
+        likes: parseInt(likesFromCache, 10),
+        source: "cache",
+      };
+    } catch {
+      const query = {
+        text: "SELECT COUNT(*)::int AS likes FROM user_album_likes WHERE album_id = $1",
+        values: [albumId],
+      };
+      const result = await this._pool.query(query);
+      const likesFromDB = result.rows[0].likes;
+      try {
+        await this._cacheService.set(
+          `album-likes:${albumId}`,
+          likesFromDB.toString()
+        );
+      } catch (cacheSetError) {
+        console.error("Cache SET Error:", cacheSetError.message);
+      }
+
+      return {
+        likes: likesFromDB,
+        source: "db",
+      };
+    }
   }
 
   async verifyAlbumNotLiked(albumId, userId) {
