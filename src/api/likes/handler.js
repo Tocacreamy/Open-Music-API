@@ -4,12 +4,15 @@ export class LikesHandler {
     this._albumsService = albumsService;
     this._usersService = usersService;
   }
+  
   postLikeAlbumHandler = async (request, h) => {
     const { id: albumId } = request.params;
     const { id: userId } = request.auth.credentials;
 
     await this._albumsService.getAlbumById(albumId);
+    await this._likesService.verifyAlbumNotLiked(albumId, userId);
     await this._likesService.addLike(albumId, userId);
+
     const response = h
       .response({
         status: "success",
@@ -24,6 +27,7 @@ export class LikesHandler {
 
     await this._albumsService.getAlbumById(albumId);
     const likes = await this._likesService.getLikesCount(albumId);
+
     const response = h.response({
       status: "success",
       data: {
