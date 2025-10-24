@@ -24,16 +24,22 @@ export class AlbumsHandler {
 
   getAlbumById = async (request, h) => {
     const { id: albumId } = request.params;
-    const { id, name, year, cover: coverUrl } = await this._service.getAlbumById(albumId);
+    const album = await this._service.getAlbumById(albumId);
+
+    // Build full URL only if cover exists
+    const coverUrl = album.cover
+      ? `http://${process.env.HOST}:${process.env.PORT}/albums/covers/${album.cover}`
+      : null;
 
     const response = h.response({
       status: "success",
       data: {
         album: {
-          id,
-          name,
-          year,
+          id: album.id,
+          name: album.name,
+          year: album.year,
           coverUrl,
+          songs: album.songs,
         },
       },
     });
@@ -73,8 +79,7 @@ export class AlbumsHandler {
 
     const filename = await this._storageService.writeFile(cover, cover.hapi);
 
-    const fileLocation = `http://${process.env.HOST}:${process.env.PORT}/albums/covers/${filename}`;
-    await this._service.updateAlbumCover(request.params.id, fileLocation);
+    await this._service.updateAlbumCover(request.params.id, filename);
 
     const response = h.response({
       status: "success",
