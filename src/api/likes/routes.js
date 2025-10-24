@@ -10,15 +10,12 @@ export const routes = (handler) => [
   {
     method: "GET",
     path: "/albums/{id}/likes",
-    handler: handler.deleteLikeAlbumHandler,
-    options: {
-      auth: "openmusic_jwt",
-    },
+    handler: handler.getLikeAlbumHandler,
   },
   {
     method: "DELETE",
     path: "/albums/{id}/likes",
-    handler: handler.getAlbumLikesHandler,
+    handler: handler.deleteLikeAlbumHandler,
     options: {
       auth: "openmusic_jwt",
     },

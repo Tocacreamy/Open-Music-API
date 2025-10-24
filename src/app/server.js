@@ -48,6 +48,10 @@ import { ProducerService } from "../services/rabbitmq/ProducerService.js";
 import { UploadsValidator } from "../validator/uploads/index.js";
 import { StorageService } from "../services/storage/StorageService.js";
 
+// likes
+import { likes } from "../api/likes/index.js";
+import { LikesService } from "../services/postgres/LikesService.js";
+
 // exceptions
 import ClientError from "../exceptions/ClientError.js";
 
@@ -62,6 +66,7 @@ const init = async () => {
   const playlistsService = new PlaylistsService();
   const playlistSongsService = new PlaylistSongsService();
   const collaborationsService = new CollaborationsService();
+  const likesService = new LikesService();
 
   const uploadDir = path.resolve(__dirname, "../api/albums/covers/images");
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -159,6 +164,14 @@ const init = async () => {
         playlistsService: playlistsService,
       },
     },
+    {
+      plugin: likes,
+      options: {
+        likesService,
+        albumsService: albumService,
+        usersService,
+      },
+    }
   ]);
 
   server.ext("onPreResponse", (request, h) => {

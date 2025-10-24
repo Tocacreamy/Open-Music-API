@@ -21,14 +21,13 @@ export class LikesHandler {
 
   getLikeAlbumHandler = async (request, h) => {
     const { id: albumId } = request.params;
-    const { id: userId } = request.auth.credentials;
 
     await this._albumsService.getAlbumById(albumId);
-    const like = await this._likesService.getLike(albumId, userId);
+    const likes = await this._likesService.getLikesCount(albumId);
     const response = h.response({
       status: "success",
       data: {
-        like,
+        likes,
       },
     });
     response.code(200);
@@ -48,5 +47,4 @@ export class LikesHandler {
     response.code(200);
     return response;
   };
-  
 }
