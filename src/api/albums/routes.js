@@ -32,4 +32,13 @@ export const routes = (handler) => [
       },
     },
   },
+  {
+    method: "GET",
+    path: "/albums/covers/{param*}",
+    handler: {
+      directory: {
+        path: "src/api/albums/covers/images",
+      },
+    },
+  },
 ];
